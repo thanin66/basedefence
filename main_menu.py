@@ -75,14 +75,14 @@ def settings_menu():
     while True:
         screen.fill(WHITE)
         
-        draw_text("Settings", font, BLACK, screen, 350, 50)
-        
+        draw_text("Settings", font, BLACK, screen, 350, 50)     
         # Toggle fullscreen button
         action = draw_button(screen, GREEN, 300, 200, 200, 50, "Fullscreen: " + ("On" if fullscreen else "Off"), BLACK, "fullscreen_toggle")
         if action == "fullscreen_toggle":
             fullscreen = not fullscreen
             if fullscreen:
-                screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+           
+                screen = pygame.display.set_mode((1980, 1080), pygame.FULLSCREEN)
             else:
                 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
