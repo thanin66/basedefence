@@ -51,11 +51,18 @@ def draw_button(screen, x, y, width, height, text, color):
 
 
 
-class Player :
+class Player(pygame.sprite.Sprite) :
     ACTIONS = [ 'Idle', 'Attack', 'Move', 'Jump',]
     GRAVITY = 0.5
 
     def __init__(self,action = None, x = 640, y = 200 , hp = 100, dmg = 11, speed = 2,):
+        super().__init__()
+        self.image = pygame.Surface((50, 50))
+        self.image.fill(WHITE)
+        self.rect = self.image.get_rect()
+        self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
+        self.vel_x = 0
+        self.vel_y = 0
         self.action = action
         self.x = x
         self.y = y
@@ -78,6 +85,20 @@ class Player :
     def jump(self, jump_strength):
         # เมื่อกระโดด ความเร็วในแนวตั้งจะถูกเซ็ตให้เป็นค่าของ jump_strength
         self.velocity_y = -jump_strength
+    def update(self):
+        # อัพเดทตำแหน่งของผู้เล่น
+        self.rect.x += self.vel_x
+        self.rect.y += self.vel_y
+
+        # ฟิสิกส์: เบรกหลังถ้าชนขอบหน้าต่าง
+        if self.rect.left < 0:
+            self.rect.left = 0
+        elif self.rect.right > SCREEN_WIDTH:
+            self.rect.right = SCREEN_WIDTH
+        if self.rect.top < 0:
+            self.rect.top = 0
+        elif self.rect.bottom > SCREEN_HEIGHT:
+            self.rect.bottom = SCREEN_HEIGHT
 
 
 class inventory :
@@ -98,6 +119,7 @@ def mode_game(screen):
                     main_menu(screen)
                 elif easy_button_rect.collidepoint(mouse_pos):
                     print("easy Button Clicked")
+                    main_game()
                 elif hard_button_rect.collidepoint(mouse_pos):
                     print("hard Button Clicked")
 
@@ -114,9 +136,6 @@ def mode_game(screen):
 
 
         pygame.display.flip()
-
-
-
 
 
 
@@ -197,7 +216,49 @@ def setting_menu(screen):
         pygame.display.flip()
 
 
+def main_game(screen):
+    pygame.init()
+    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+    pygame.display.set_caption("Pygame Player Movement")
 
+    clock = pygame.time.Clock()
+
+    all_sprites = pygame.sprite.Group()
+    player = Player()
+    all_sprites.add(player)
+
+    # ลูปหลัก
+    running = True
+    while running:
+        # ตรวจสอบการคลิกปิด
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LEFT:
+                    player.vel_x = -5
+                elif event.key == pygame.K_RIGHT:
+                    player.vel_x = 5
+                elif event.key == pygame.K_UP:
+                    player.vel_y = -5
+                elif event.key == pygame.K_DOWN:
+                    player.vel_y = 5
+            elif event.type == pygame.KEYUP:
+                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
+                    player.vel_x = 0
+                elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
+                    player.vel_y = 0
+
+        # อัพเดท
+        all_sprites.update()
+
+        # วาด
+        screen.fill(button_color)
+        all_sprites.draw(screen)
+        pygame.display.flip()
+
+        # จำกัดเฟรมเรต
+        clock.tick(60)
 
 # กำหนดหน้าจอ
 pygame.init()
