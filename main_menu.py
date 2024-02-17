@@ -1,10 +1,8 @@
 import pygame
 import sys
-# Initialize Pygame
-
 
 # Screen dimensions
-SCREEN_WIDTH = 1600
+SCREEN_WIDTH = 1400
 SCREEN_HEIGHT = 900
 
 # Colors
@@ -12,17 +10,21 @@ WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 GRAY = (150, 150, 150)
 GREEN = (0, 255, 0)
-BUTTON_IMAGE = pygame.image.load('img/button.png')
+
+# Initialize Pygame
+pygame.init()
 
 # Set up the screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("base def")
-pygame.init()
 
+# Font settings
+font = pygame.font.Font(None, 50)
+
+bg = pygame.image.load('images/clouds/cloud_2.png').convert()
+bg_rect = bg.get_rect()
 
 def main_menu_game():
-    # Font settings
-    font = pygame.font.Font(None, 36)
     # Function to draw text on the screen
     def draw_text(text, font, color, surface, x, y):
         text_obj = font.render(text, True, color)
@@ -46,33 +48,26 @@ def main_menu_game():
     # Main menu loop
     def main_menu():
         while True:
-            screen.fill(WHITE)
-            draw_text("Main Menu", font, BLACK, screen, (SCREEN_WIDTH // 2), 50)
-            
-            action = draw_button(screen, BUTTON_IMAGE, (SCREEN_WIDTH // 2), 200, 200, 50, "play")
+            screen.fill(WHITE)            
+            draw_text("Main Menu", font, BLACK, screen, (SCREEN_WIDTH // 2 ), 50)        
+            action = draw_button(screen, GREEN, (SCREEN_WIDTH // 2 ), 200, 200, 50, "Play", BLACK, "play")
             if action == "play":
-                game_play()
-                
-            action = draw_button(screen, BUTTON_IMAGE, (SCREEN_WIDTH // 2), 300, 200, 50, "settings")
+                print('start') 
+            action = draw_button(screen, GREEN, (SCREEN_WIDTH // 2 ), 300, 200, 50, "Settings", BLACK, "settings")
             if action == "settings":
-                settings_menu()
-                
-            action = draw_button(screen, BUTTON_IMAGE, (SCREEN_WIDTH // 2), 400, 200, 50, "quit")
+                settings_menu()  
+            action = draw_button(screen, GREEN, (SCREEN_WIDTH // 2 ), 400, 200, 50, "Quit", BLACK, "quit")
             if action == "quit":
                 pygame.quit()
                 sys.exit()
-                
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
                     sys.exit()
-                    
             pygame.display.update()
-        
-        
+
     # Settings menu loop
     def settings_menu():
-        global screen  # Declare screen as global
         fullscreen = False
         while True:
             screen.fill(WHITE)
@@ -88,11 +83,8 @@ def main_menu_game():
                 fullscreen = not fullscreen
                 if fullscreen:
                     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
-                    
                 else:
-
                     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -101,7 +93,7 @@ def main_menu_game():
 
             pygame.display.update()
 
-    # Start the main menu
+
+    #Start the main menu
     main_menu()
 main_menu_game()
-
