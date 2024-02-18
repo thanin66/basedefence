@@ -1,6 +1,5 @@
 import pygame
 from pygame import mixer
-
 import sys
 
 # Initialize pygame font module
@@ -57,8 +56,8 @@ class Player(pygame.sprite.Sprite) :
 
     def __init__(self,action = None, x = 0, y = 720 , hp = 100, dmg = 11, speed = 2,):
         super().__init__()
-        self.image =pygame.image.load(f'Knight/Idle/0.png')
-        self.image = pygame.transform.scale(self.image, (self.image.get_width() * 3.7 , self.image.get_height() * 3.7 ))
+        self.image =pygame.image.load(f'images/character/001.png')
+        self.image = pygame.transform.scale(self.image, (self.image.get_width()//4 , self.image.get_height() //4))
         self.rect = self.image.get_rect()
         self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
@@ -73,6 +72,7 @@ class Player(pygame.sprite.Sprite) :
         self.velocity_y = 0
 
 
+
     def apply_gravity(self):
         # ในแต่ละเฟรม ความเร็วในแนวตั้งจะเพิ่มขึ้นตามค่าแรงโน้มถ่วง
         self.velocity_y += Player.GRAVITY
@@ -81,6 +81,11 @@ class Player(pygame.sprite.Sprite) :
     def jump(self, jump_strength):
         # เมื่อกระโดด ความเร็วในแนวตั้งจะถูกเซ็ตให้เป็นค่าของ jump_strength
         self.velocity_y = -jump_strength
+    def jump(self):
+        # กระโดดเฉพาะเมื่ออยู่บนพื้น
+        if self.rect.bottom >= SCREEN_HEIGHT - 100:
+            self.y = self.jump_power
+
     def update(self):
         # อัพเดทตำแหน่งของผู้เล่น
         self.rect.x += self.x
@@ -94,12 +99,6 @@ class Player(pygame.sprite.Sprite) :
             self.rect.top = 0
         elif self.rect.bottom > SCREEN_HEIGHT-100:
             self.rect.bottom = SCREEN_HEIGHT - 100
-
-    def jump(self):
-        # กระโดดเฉพาะเมื่ออยู่บนพื้น
-        if self.rect.bottom >= SCREEN_HEIGHT - 100:
-            self.y = self.jump_power
-
 class inventory :
     ()
 
@@ -236,7 +235,7 @@ def game_setting_menu(screen):
 
         # สร้างปุ่ม Back
         back_button_rect = pygame.Rect(700, 500, button_width, button_height)
-        draw_button(screen, back_button_rect.x, back_button_rect.y, button_width, button_height, "Back", gray)
+        draw_button(screen, back_button_rect.x, back_button_rect.y, button_width, button_height, "back to game", gray)
 
         main_button_rect = pygame.Rect(360, 500, button_width, button_height)
         draw_button(screen, main_button_rect.x, main_button_rect.y, button_width, button_height, "to Main menu", gray)
