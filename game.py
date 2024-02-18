@@ -27,9 +27,9 @@ button_height = 50
 
 # กำหนดสีของปุ่มเมื่อไม่กด
 button_color_white = (255, 255, 255)
-button_color = (150, 150, 150) 
-button_color_green = (0, 255, 0)
-button_color_red =  (255, 0, 0)
+gray = (150, 150, 150) 
+green = (0, 255, 0)
+red =  (255, 0, 0)
 button_color_magen = (255, 0, 255)
 button_color_black = (0, 0, 0)
 button_color_active = (255, 255, 255)
@@ -55,14 +55,15 @@ class Player(pygame.sprite.Sprite) :
     ACTIONS = [ 'Idle', 'Attack', 'Move', 'Jump',]
     GRAVITY = 0.5
 
-    def __init__(self,action = None, x = 640, y = 200 , hp = 100, dmg = 11, speed = 2,):
+    def __init__(self,action = None, x = 0, y = 720 , hp = 100, dmg = 11, speed = 2,):
         super().__init__()
-        self.image = pygame.Surface((50, 50))
-        self.image.fill(WHITE)
+        self.image =pygame.image.load(f'Knight/Idle/0.png')
+        self.image = pygame.transform.scale(self.image, (self.image.get_width() * 3.7 , self.image.get_height() * 3.7 ))
         self.rect = self.image.get_rect()
         self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
-        self.vel_x = 0
-        self.vel_y = 0
+
+        self.jump_power = -10  # พลังกระโดด
+        self.gravity = 0.5  # แรงโน้มถ่วง
         self.action = action
         self.x = x
         self.y = y
@@ -70,12 +71,7 @@ class Player(pygame.sprite.Sprite) :
         self.dmg = dmg
         self.speed = speed
         self.velocity_y = 0
-        
 
-    def move_left(self):
-        self.x += self.speed
-    def move_right(self):
-        self.x -= self.speed
 
     def apply_gravity(self):
         # ในแต่ละเฟรม ความเร็วในแนวตั้งจะเพิ่มขึ้นตามค่าแรงโน้มถ่วง
@@ -87,19 +83,22 @@ class Player(pygame.sprite.Sprite) :
         self.velocity_y = -jump_strength
     def update(self):
         # อัพเดทตำแหน่งของผู้เล่น
-        self.rect.x += self.vel_x
-        self.rect.y += self.vel_y
+        self.rect.x += self.x
+        self.rect.y += self.y
+
+        # ฟิสิกส์: ใช้แรงโน้มถ่วง
+        self.y += self.gravity
 
         # ฟิสิกส์: เบรกหลังถ้าชนขอบหน้าต่าง
-        if self.rect.left < 0:
-            self.rect.left = 0
-        elif self.rect.right > SCREEN_WIDTH:
-            self.rect.right = SCREEN_WIDTH
         if self.rect.top < 0:
             self.rect.top = 0
-        elif self.rect.bottom > SCREEN_HEIGHT:
-            self.rect.bottom = SCREEN_HEIGHT
+        elif self.rect.bottom > SCREEN_HEIGHT-100:
+            self.rect.bottom = SCREEN_HEIGHT - 100
 
+    def jump(self):
+        # กระโดดเฉพาะเมื่ออยู่บนพื้น
+        if self.rect.bottom >= SCREEN_HEIGHT - 100:
+            self.y = self.jump_power
 
 class inventory :
     ()
@@ -119,27 +118,23 @@ def mode_game(screen):
                     main_menu(screen)
                 elif easy_button_rect.collidepoint(mouse_pos):
                     print("easy Button Clicked")
-                    main_game()
+                    main_game(screen)
                 elif hard_button_rect.collidepoint(mouse_pos):
                     print("hard Button Clicked")
 
         screen.blit(bg, (0, 0))
 
         back_button_rect = pygame.Rect(10, 40, button_width, button_height)
-        draw_button(screen, back_button_rect.x, back_button_rect.y, button_width, button_height, "Back", button_color)
+        draw_button(screen, back_button_rect.x, back_button_rect.y, button_width, button_height, "Back", gray)
 
         easy_button_rect = pygame.Rect(360, 300, button_width, button_height)
-        draw_button(screen, easy_button_rect.x, easy_button_rect.y, button_width, button_height, "easy", button_color_green)
+        draw_button(screen, easy_button_rect.x, easy_button_rect.y, button_width, button_height, "easy", green)
 
         hard_button_rect = pygame.Rect(700, 300, button_width, button_height)
-        draw_button(screen, hard_button_rect.x, hard_button_rect.y, button_width, button_height, "hard", button_color_red)
+        draw_button(screen, hard_button_rect.x, hard_button_rect.y, button_width, button_height, "hard", red)
 
 
         pygame.display.flip()
-
-
-
-
 
 
 # ฟังก์ชันสำหรับแสดงเมนูหลัก
@@ -168,15 +163,15 @@ def main_menu(screen):
 
         # สร้างปุ่ม start
         start_button_rect = pygame.Rect(540, 200, button_width, button_height)
-        draw_button(screen, start_button_rect.x, start_button_rect.y, button_width, button_height, "Start", button_color)
+        draw_button(screen, start_button_rect.x, start_button_rect.y, button_width, button_height, "Start", gray)
 
         # สร้างปุ่ม setting
         setting_button_rect = pygame.Rect(540, 300, button_width, button_height)
-        draw_button(screen, setting_button_rect.x, setting_button_rect.y, button_width, button_height, "Setting", button_color)
+        draw_button(screen, setting_button_rect.x, setting_button_rect.y, button_width, button_height, "Setting", gray)
 
         # สร้างปุ่ม quit
         quit_button_rect = pygame.Rect(540, 400, button_width, button_height)
-        draw_button(screen, quit_button_rect.x, quit_button_rect.y, button_width, button_height, "Quit", button_color)
+        draw_button(screen, quit_button_rect.x, quit_button_rect.y, button_width, button_height, "Quit", gray)
 
         pygame.display.flip()
 
@@ -205,24 +200,59 @@ def setting_menu(screen):
 
         # สร้างปุ่ม Back
         back_button_rect = pygame.Rect(540, 500, button_width, button_height)
-        draw_button(screen, back_button_rect.x, back_button_rect.y, button_width, button_height, "Back", button_color_magen)
+        draw_button(screen, back_button_rect.x, back_button_rect.y, button_width, button_height, "Back", gray)
 
         fullscreen_button_rect = pygame.Rect(360, 200, button_width, button_height)
-        draw_button(screen, fullscreen_button_rect.x, fullscreen_button_rect.y, button_width, button_height, "fullscreen", button_color)
+        draw_button(screen, fullscreen_button_rect.x, fullscreen_button_rect.y, button_width, button_height, "fullscreen", gray)
 
         window_button_rect = pygame.Rect(700, 200, button_width, button_height)
-        draw_button(screen, window_button_rect.x, window_button_rect.y, button_width, button_height, "window", button_color)
+        draw_button(screen, window_button_rect.x, window_button_rect.y, button_width, button_height, "window", gray)
+
+        pygame.display.flip()
+def game_setting_menu(screen):
+    while True:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if back_button_rect.collidepoint(mouse_pos):
+                    print("back to game")
+                    return  
+                elif main_button_rect.collidepoint(mouse_pos):
+                    print("to Main menu")
+                    main_menu(screen)
+                elif fullscreen_button_rect.collidepoint(mouse_pos):
+                    print('fullscreen')
+                    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), pygame.FULLSCREEN)
+
+                elif window_button_rect.collidepoint(mouse_pos):
+                    print('fullscreen')
+                    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
+                    return
+
+        screen.blit(bg, (0, 0))
+
+        # สร้างปุ่ม Back
+        back_button_rect = pygame.Rect(700, 500, button_width, button_height)
+        draw_button(screen, back_button_rect.x, back_button_rect.y, button_width, button_height, "Back", gray)
+
+        main_button_rect = pygame.Rect(360, 500, button_width, button_height)
+        draw_button(screen, main_button_rect.x, main_button_rect.y, button_width, button_height, "to Main menu", gray)
+
+        fullscreen_button_rect = pygame.Rect(360, 200, button_width, button_height)
+        draw_button(screen, fullscreen_button_rect.x, fullscreen_button_rect.y, button_width, button_height, "fullscreen", gray)
+
+        window_button_rect = pygame.Rect(700, 200, button_width, button_height)
+        draw_button(screen, window_button_rect.x, window_button_rect.y, button_width, button_height, "window", gray)
 
         pygame.display.flip()
 
-
 def main_game(screen):
     pygame.init()
-    screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-    pygame.display.set_caption("Pygame Player Movement")
-
+    bg = pygame.image.load('images/background/bg_2.png')
     clock = pygame.time.Clock()
-
     all_sprites = pygame.sprite.Group()
     player = Player()
     all_sprites.add(player)
@@ -234,32 +264,42 @@ def main_game(screen):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                mouse_pos = pygame.mouse.get_pos()
+                if pause_button_rect.collidepoint(mouse_pos):
+                    print("pause")
+                    game_setting_menu(screen)
             elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_LEFT:
-                    player.vel_x = -5
-                elif event.key == pygame.K_RIGHT:
-                    player.vel_x = 5
-                elif event.key == pygame.K_UP:
-                    player.vel_y = -5
-                elif event.key == pygame.K_DOWN:
-                    player.vel_y = 5
+                if event.key == pygame.K_a:
+                    player.x = -5
+                elif event.key == pygame.K_d:
+                    player.x = 5
+                elif event.key == pygame.K_SPACE:  # เมื่อกด Spacebar ให้กระโดด
+                    player.jump()
             elif event.type == pygame.KEYUP:
-                if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    player.vel_x = 0
-                elif event.key == pygame.K_UP or event.key == pygame.K_DOWN:
-                    player.vel_y = 0
+                if event.key == pygame.K_a and player.x < 0:
+                    player.x = 0
+                elif event.key == pygame.K_d and player.x > 0:
+                    player.x = 0
 
-        # อัพเดท
+        screen.blit(bg, (0, 0))
+
+
+        pause_button_rect = pygame.Rect(1100, 30, 50, button_height)
+        draw_button(screen, pause_button_rect.x, pause_button_rect.y, 50, button_height, "ll", gray)
+
+
         all_sprites.update()
 
         # วาด
-        screen.fill(button_color)
         all_sprites.draw(screen)
         pygame.display.flip()
 
         # จำกัดเฟรมเรต
         clock.tick(60)
 
+    pygame.quit()
+    sys.exit()
 # กำหนดหน้าจอ
 pygame.init()
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
