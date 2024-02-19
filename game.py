@@ -13,11 +13,13 @@ SCREEN_HEIGHT = 720
 WHITE = (255, 255, 255)
 
 # กำหนดภาพพื้นหลัง
-bg = pygame.image.load('images/background/bg_1.png')
+bg = pygame.image.load('images/background/bg_1_p.png')
 bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+left_scenes = ['scene1_left', 'scene2_left', 'scene3_left']
+right_scenes = ['scene1_right', 'scene2_right', 'scene3_right']
+current_scene = 'scene1_left'  # ฉากเริ่มต้น
 
-# กำหนดภาพปุ่ม
-button_img = pygame.image.load('images/button/button.png')
+
 # กำหนดเสียงของปุ่ม
 
 # กำหนดขนาดปุ่ม
@@ -104,7 +106,8 @@ class inventory :
 
 def mode_game(screen):
     global back_button_rect, easy_button_rect, hard_button_rect
-    bg = pygame.image.load('images/background/bg_2.png')
+    bg = pygame.image.load('images/background/bg_1_p.png')
+    bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
     while True:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -134,7 +137,6 @@ def mode_game(screen):
 
 
         pygame.display.flip()
-
 
 # ฟังก์ชันสำหรับแสดงเมนูหลัก
 def main_menu(screen):
@@ -248,14 +250,16 @@ def game_setting_menu(screen):
 
         pygame.display.flip()
 
+
 def main_game(screen):
     pygame.init()
-    bg = pygame.image.load('images/background/bg_2.png')
+    bg = pygame.image.load('images/background/bg_4.png')
+    bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
     player = Player()
     all_sprites.add(player)
-
+    
     # ลูปหลัก
     running = True
     while running:
