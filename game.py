@@ -1,7 +1,5 @@
-import pygame
+import pygame,sys,random
 from pygame import mixer
-import sys
-
 # Initialize pygame font module
 pygame.font.init()
 mixer.init()
@@ -15,9 +13,6 @@ WHITE = (255, 255, 255)
 # กำหนดภาพพื้นหลัง
 bg = pygame.image.load('images/background/bg_1_p.png')
 bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
-left_scenes = ['scene1_left', 'scene2_left', 'scene3_left']
-right_scenes = ['scene1_right', 'scene2_right', 'scene3_right']
-current_scene = 'scene1_left'  # ฉากเริ่มต้น
 
 
 # กำหนดเสียงของปุ่ม
@@ -27,13 +22,12 @@ button_width = 200
 button_height = 50
 
 # กำหนดสีของปุ่มเมื่อไม่กด
-button_color_white = (255, 255, 255)
+white = (255, 255, 255)
 gray = (150, 150, 150) 
 green = (0, 255, 0)
 red =  (255, 0, 0)
-button_color_magen = (255, 0, 255)
-button_color_black = (0, 0, 0)
-button_color_active = (255, 255, 255)
+magen = (255, 0, 255)
+black = (0, 0, 0)
 
 # เสียงปุ่ม
 
@@ -50,8 +44,29 @@ def draw_button(screen, x, y, width, height, text, color):
     text_rect = text_surface.get_rect(center=(x + width / 2, y + height / 2))
     screen.blit(text_surface, text_rect)
 
+class Tree(pygame.sprite.Sprite):
+	def __init__(self,pos,group):
+		super().__init__(group)
+		self.image = pygame.image.load('images/character/001').convert_alpha()
+		self.rect = self.image.get_rect(topleft = pos)
 
+class Enemy(pygame.sprite.Sprite):
+    def __init__(self, player,hp, *groups):
+        super().__init__(*groups)
+        self.player = player
+        self.hp = hp
+        self.image = pygame.Surface((50, 50))  # กำหนดภาพของ Enemy
+        self.image.fill((255, 0, 0))  # สีแดง
+        self.rect = self.image.get_rect(center=(random.randint(0, 1280),550 ))  # กำหนดตำแหน่งเริ่มต้นของ Enemy
 
+    def update(self):
+        # เคลื่อนที่ไปทางซ้ายหรือขวาเพื่อเข้าหา Player
+        if self.rect.x < self.player.rect.x:  # ถ้า Enemy อยู่ซ้ายของ Player
+            self.rect.x += 1  # เคลื่อนที่ไปทางขวา
+        elif self.rect.x > self.player.rect.x:  # ถ้า Enemy อยู่ขวาของ Player
+            self.rect.x -= 1  # เคลื่อนที่ไปทางซ้าย
+        elif self.rect.x == self.player.rect.x: 
+            ()
 class Player(pygame.sprite.Sprite) :
     ACTIONS = [ 'Idle', 'Attack', 'Move', 'Jump',]
     GRAVITY = 0.5
@@ -263,9 +278,18 @@ def main_game(screen):
     player = Player()
     all_sprites.add(player)
 
+
+
     # สร้างรายการภาพพื้นหลังตามลำดับที่กำหนด
     background_scenes = ['block', 'bg_3_left', 'bg_2_left', 'bg_1_left', 'bg_main', 'bg_1_right', 'bg_2_right', 'bg_3_right','block']
     current_scene_index = 4  # กำหนดให้ภาพเริ่มต้นที่ index 3 คือ 'bg_1'
+
+
+    enemy = Enemy(player,20)
+    all_sprites.add(enemy)
+
+
+
 
 
     # ลูปหลัก
@@ -302,6 +326,9 @@ def main_game(screen):
             if player.rect.right >= SCREEN_WIDTH - 20 :  # ถ้าผู้เล่นอยู่ที่ขอบขวาของหน้าจอ
                 player.x = -1
                 player.jump()
+
+        
+            
         if player.rect.right >= SCREEN_WIDTH:  # ถ้าผู้เล่นอยู่ที่ขอบขวาของหน้าจอ
             current_scene_index = (current_scene_index + 1) % len(background_scenes)  # เปลี่ยนไปฉากถัดไปในรายการ
             # โหลดภาพพื้นหลังของฉากใหม่
@@ -309,7 +336,7 @@ def main_game(screen):
             bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
             # อัพเดทตำแหน่งของผู้เล่นให้เริ่มต้นที่ขอบซ้ายของหน้าจอ
             player.rect.left = 0
-
+            
         elif player.rect.left <= 0:  # ถ้าผู้เล่นอยู่ที่ขอบซ้ายของหน้าจอ
             current_scene_index = (current_scene_index - 1) % len(background_scenes)  # เปลี่ยนไปฉากถัดไปในรายการa
             # โหลดภาพพื้นหลังของฉากใหม่
@@ -317,8 +344,9 @@ def main_game(screen):
             bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
             # อัพเดทตำแหน่งของผู้เล่นให้เริ่มต้นที่ขอบขวาของหน้าจอ
             player.rect.right = SCREEN_WIDTH
+            
 
-           
+
         screen.blit(bg, (0, 0))
         pause_button_rect = pygame.Rect(1100, 30, 50, button_height)
         draw_button(screen, pause_button_rect.x, pause_button_rect.y, 50, button_height, "ll", gray)
