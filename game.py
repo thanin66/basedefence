@@ -56,7 +56,7 @@ class Player(pygame.sprite.Sprite) :
     ACTIONS = [ 'Idle', 'Attack', 'Move', 'Jump',]
     GRAVITY = 0.5
 
-    def __init__(self,action = None, x = 0, y = 720 , hp = 100, dmg = 11, speed = 2,):
+    def __init__(self,action = None, x = 0, y = 720 , hp = 100, dmg = 11, speed = 5,):
         super().__init__()
         self.image =pygame.image.load(f'images/character/001.png')
         self.image = pygame.transform.scale(self.image, (self.image.get_width()//4 , self.image.get_height() //4))
@@ -72,8 +72,10 @@ class Player(pygame.sprite.Sprite) :
         self.dmg = dmg
         self.speed = speed
         self.velocity_y = 0
-
-
+    def left(self):
+        self.x += 10
+    def right(self):
+        self.x -= 10
 
     def apply_gravity(self):
         # ในแต่ละเฟรม ความเร็วในแนวตั้งจะเพิ่มขึ้นตามค่าแรงโน้มถ่วง
@@ -101,6 +103,7 @@ class Player(pygame.sprite.Sprite) :
             self.rect.top = 0
         elif self.rect.bottom > SCREEN_HEIGHT-100:
             self.rect.bottom = SCREEN_HEIGHT - 100
+
 class inventory :
     ()
 
@@ -253,13 +256,18 @@ def game_setting_menu(screen):
 
 def main_game(screen):
     pygame.init()
-    bg = pygame.image.load('images/background/bg_4.png')
+    bg = pygame.image.load('images/background/bg_main.png')
     bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
     player = Player()
     all_sprites.add(player)
-    
+
+    # สร้างรายการภาพพื้นหลังตามลำดับที่กำหนด
+    background_scenes = ['block', 'bg_3_left', 'bg_2_left', 'bg_1_left', 'bg_main', 'bg_1_right', 'bg_2_right', 'bg_3_right','block']
+    current_scene_index = 4  # กำหนดให้ภาพเริ่มต้นที่ index 3 คือ 'bg_1'
+
+
     # ลูปหลัก
     running = True
     while running:
@@ -272,22 +280,46 @@ def main_game(screen):
                 if pause_button_rect.collidepoint(mouse_pos):
                     print("pause")
                     game_setting_menu(screen)
-            elif event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_a:
-                    player.x = -5
-                elif event.key == pygame.K_d:
-                    player.x = 5
-                elif event.key == pygame.K_SPACE:  # เมื่อกด Spacebar ให้กระโดด
-                    player.jump()
+
+            if event.type == pygame.KEYDOWN:
+               if event.key == pygame.K_a:
+                   player.x = -10
+               elif event.key == pygame.K_d:
+                   player.x = 10
+               elif event.key == pygame.K_SPACE:  # เมื่อกด Spacebar ให้กระโดด
+                   player.jump()
             elif event.type == pygame.KEYUP:
                 if event.key == pygame.K_a and player.x < 0:
-                    player.x = 0
+                   player.x = 0
                 elif event.key == pygame.K_d and player.x > 0:
-                    player.x = 0
+                   player.x = 0
+        
+        if background_scenes[current_scene_index] == 'bg_3_left':
+            if player.rect.left <= 20:  # ถ้าผู้เล่นอยู่ที่ขอบซ้ายของหน้าจอ
+                player.x = 1
+                player.jump()
+        if background_scenes[current_scene_index] == 'bg_3_right':
+            if player.rect.right >= SCREEN_WIDTH - 20 :  # ถ้าผู้เล่นอยู่ที่ขอบขวาของหน้าจอ
+                player.x = -1
+                player.jump()
+        if player.rect.right >= SCREEN_WIDTH:  # ถ้าผู้เล่นอยู่ที่ขอบขวาของหน้าจอ
+            current_scene_index = (current_scene_index + 1) % len(background_scenes)  # เปลี่ยนไปฉากถัดไปในรายการ
+            # โหลดภาพพื้นหลังของฉากใหม่
+            bg = pygame.image.load(f'images/background/{background_scenes[current_scene_index]}.png')
+            bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+            # อัพเดทตำแหน่งของผู้เล่นให้เริ่มต้นที่ขอบซ้ายของหน้าจอ
+            player.rect.left = 0
 
+        elif player.rect.left <= 0:  # ถ้าผู้เล่นอยู่ที่ขอบซ้ายของหน้าจอ
+            current_scene_index = (current_scene_index - 1) % len(background_scenes)  # เปลี่ยนไปฉากถัดไปในรายการa
+            # โหลดภาพพื้นหลังของฉากใหม่
+            bg = pygame.image.load(f'images/background/{background_scenes[current_scene_index]}.png')
+            bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+            # อัพเดทตำแหน่งของผู้เล่นให้เริ่มต้นที่ขอบขวาของหน้าจอ
+            player.rect.right = SCREEN_WIDTH
+
+           
         screen.blit(bg, (0, 0))
-
-
         pause_button_rect = pygame.Rect(1100, 30, 50, button_height)
         draw_button(screen, pause_button_rect.x, pause_button_rect.y, 50, button_height, "ll", gray)
 
