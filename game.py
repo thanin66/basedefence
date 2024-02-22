@@ -44,53 +44,44 @@ def draw_button(screen, x, y, width, height, text, color):
     text_rect = text_surface.get_rect(center=(x + width / 2, y + height / 2))
     screen.blit(text_surface, text_rect)
 
-class Tree(pygame.sprite.Sprite):
-	def __init__(self,pos,group):
-		super().__init__(group)
-		self.image = pygame.image.load('images/character/001').convert_alpha()
-		self.rect = self.image.get_rect(topleft = pos)
-
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, player,hp, *groups):
+    def __init__(self, player,hp, speed, *groups):
         super().__init__(*groups)
         self.player = player
         self.hp = hp
-        self.image = pygame.Surface((50, 50))  # กำหนดภาพของ Enemy
-        self.image.fill((255, 0, 0))  # สีแดง
-        self.rect = self.image.get_rect(center=(random.randint(0, 1280),550 ))  # กำหนดตำแหน่งเริ่มต้นของ Enemy
-
+        self.image = pygame.image.load('images/character/e1.png')  # กำหนดภาพของ Enemy
+        self.image = pygame.transform.scale(self.image, (self.image.get_width()//2 , self.image.get_height() //2))
+        self.rect = self.image.get_rect(center=(random.randint(0, 1280),560 ))  # กำหนดตำแหน่งเริ่มต้นของ Enemy
+        self.speed = speed
     def update(self):
         # เคลื่อนที่ไปทางซ้ายหรือขวาเพื่อเข้าหา Player
         if self.rect.x < self.player.rect.x:  # ถ้า Enemy อยู่ซ้ายของ Player
-            self.rect.x += 1  # เคลื่อนที่ไปทางขวา
+            self.rect.x += self.speed  # เคลื่อนที่ไปทางขวา
         elif self.rect.x > self.player.rect.x:  # ถ้า Enemy อยู่ขวาของ Player
-            self.rect.x -= 1  # เคลื่อนที่ไปทางซ้าย
-        elif self.rect.x == self.player.rect.x: 
-            ()
+            self.rect.x -= self.speed  # เคลื่อนที่ไปทางซ้าย
+
+
 class Player(pygame.sprite.Sprite) :
     ACTIONS = [ 'Idle', 'Attack', 'Move', 'Jump',]
     GRAVITY = 0.5
 
-    def __init__(self,action = None, x = 0, y = 720 , hp = 100, dmg = 11, speed = 5,):
+    def __init__(self,action = None, x = 0, y = 720 , hp = 100 ,max_hp = 100, dmg = 11, speed = 5,):
         super().__init__()
         self.image =pygame.image.load(f'images/character/001.png')
         self.image = pygame.transform.scale(self.image, (self.image.get_width()//4 , self.image.get_height() //4))
         self.rect = self.image.get_rect()
         self.rect.center = (SCREEN_WIDTH // 2, SCREEN_HEIGHT // 2)
 
-        self.jump_power = -10  # พลังกระโดด
+        self.jump_power = -10  # แรงกระโดด
         self.gravity = 0.5  # แรงโน้มถ่วง
-        self.action = action
-        self.x = x
-        self.y = y
-        self.hp = hp
-        self.dmg = dmg
+        self.action = action # ท่าทาง
+        self.x = x #ต่ำแหน่ง
+        self.y = y #ต่ำแหน่ง
+        self.hp = hp # เลือด
+        self.max_hp = max_hp # maxเลือด
+        self.dmg = dmg 
         self.speed = speed
         self.velocity_y = 0
-    def left(self):
-        self.x += 10
-    def right(self):
-        self.x -= 10
 
     def apply_gravity(self):
         # ในแต่ละเฟรม ความเร็วในแนวตั้งจะเพิ่มขึ้นตามค่าแรงโน้มถ่วง
@@ -104,7 +95,6 @@ class Player(pygame.sprite.Sprite) :
         # กระโดดเฉพาะเมื่ออยู่บนพื้น
         if self.rect.bottom >= SCREEN_HEIGHT - 100:
             self.y = self.jump_power
-
     def update(self):
         # อัพเดทตำแหน่งของผู้เล่น
         self.rect.x += self.x
@@ -119,9 +109,9 @@ class Player(pygame.sprite.Sprite) :
         elif self.rect.bottom > SCREEN_HEIGHT-100:
             self.rect.bottom = SCREEN_HEIGHT - 100
 
-class inventory :
+class Envor():
     ()
-
+  
 def mode_game(screen):
     global back_button_rect, easy_button_rect, hard_button_rect
     bg = pygame.image.load('images/background/bg_1_p.png')
@@ -271,24 +261,21 @@ def game_setting_menu(screen):
 
 def main_game(screen):
     pygame.init()
-    bg = pygame.image.load('images/background/bg_main.png')
-    bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
     clock = pygame.time.Clock()
     all_sprites = pygame.sprite.Group()
-    player = Player()
-    all_sprites.add(player)
-
-
-
     # สร้างรายการภาพพื้นหลังตามลำดับที่กำหนด
+    bg = pygame.image.load('images/background/bg_main.png')
+    bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
     background_scenes = ['block', 'bg_3_left', 'bg_2_left', 'bg_1_left', 'bg_main', 'bg_1_right', 'bg_2_right', 'bg_3_right','block']
     current_scene_index = 4  # กำหนดให้ภาพเริ่มต้นที่ index 3 คือ 'bg_1'
 
 
-    enemy = Enemy(player,20)
+    player = Player()
+    all_sprites.add(player)
+    
+    enemy = Enemy(player,20,1)
+    enemy.rect.x = -50
     all_sprites.add(enemy)
-
-
 
 
 
@@ -326,31 +313,49 @@ def main_game(screen):
             if player.rect.right >= SCREEN_WIDTH - 20 :  # ถ้าผู้เล่นอยู่ที่ขอบขวาของหน้าจอ
                 player.x = -1
                 player.jump()
+        if abs(enemy.rect.x - player.rect.x) < 50 : 
+            print('Ahhhhhh')       
+            player.hp -= 1
+        if player.hp == 0 :
+            print('dead')
+            main_menu(screen)
 
-        
             
         if player.rect.right >= SCREEN_WIDTH:  # ถ้าผู้เล่นอยู่ที่ขอบขวาของหน้าจอ
-            current_scene_index = (current_scene_index + 1) % len(background_scenes)  # เปลี่ยนไปฉากถัดไปในรายการ
+            current_scene_index = (current_scene_index + 1) % len(background_scenes)# เปลี่ยนไปฉากถัดไปในรายการ
             # โหลดภาพพื้นหลังของฉากใหม่
             bg = pygame.image.load(f'images/background/{background_scenes[current_scene_index]}.png')
             bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
             # อัพเดทตำแหน่งของผู้เล่นให้เริ่มต้นที่ขอบซ้ายของหน้าจอ
+            enemy.kill()
             player.rect.left = 0
-            
+            enemy = Enemy(player,20,1)
+            enemy.rect.x = random.randint(400,1280)
+            all_sprites.add(enemy)
         elif player.rect.left <= 0:  # ถ้าผู้เล่นอยู่ที่ขอบซ้ายของหน้าจอ
             current_scene_index = (current_scene_index - 1) % len(background_scenes)  # เปลี่ยนไปฉากถัดไปในรายการa
             # โหลดภาพพื้นหลังของฉากใหม่
             bg = pygame.image.load(f'images/background/{background_scenes[current_scene_index]}.png')
             bg = pygame.transform.scale(bg, (SCREEN_WIDTH, SCREEN_HEIGHT))
+            enemy.kill()
             # อัพเดทตำแหน่งของผู้เล่นให้เริ่มต้นที่ขอบขวาของหน้าจอ
             player.rect.right = SCREEN_WIDTH
-            
+            enemy = Enemy(player,20,1)
+            enemy.rect.x = random.randint(1,600)
+            all_sprites.add(enemy)
 
+        if background_scenes[current_scene_index] == 'bg_main':
+            enemy.kill()
 
         screen.blit(bg, (0, 0))
         pause_button_rect = pygame.Rect(1100, 30, 50, button_height)
         draw_button(screen, pause_button_rect.x, pause_button_rect.y, 50, button_height, "ll", gray)
-
+        
+        if not player.hp == player.max_hp:
+            red_hp_bar = pygame.Rect(player.rect.x +20 , player.rect.y - 35, 50,button_height)
+            draw_button(screen, red_hp_bar.x, red_hp_bar.y, 100, 20, "", red)
+            hp_bar = pygame.Rect(player.rect.x  +20 , player.rect.y - 35, player.hp, 50)
+            draw_button(screen, hp_bar.x, hp_bar.y,player.hp , 20, "", green)
 
         all_sprites.update()
 
@@ -360,7 +365,6 @@ def main_game(screen):
 
         # จำกัดเฟรมเรต
         clock.tick(60)
-
     pygame.quit()
     sys.exit()
 # กำหนดหน้าจอ
